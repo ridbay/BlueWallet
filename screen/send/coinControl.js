@@ -36,7 +36,7 @@ const debounce = (func, wait) => {
 };
 
 const Output = ({
-  item: { address, txid, value, vout },
+  item: { address, txid, value, vout, confirmations },
   balanceUnit = BitcoinUnit.BTC,
   oMemo,
   frozen,
@@ -55,9 +55,11 @@ const Output = ({
 
   const oStyles = StyleSheet.create({
     containerFull: { paddingHorizontal: 0 },
-    avatar: { borderColor: 'white', borderWidth: 1 },
-    amount: { fontWeight: 'bold' },
-    memo: { fontSize: 13, marginTop: 3 },
+    avatar: { borderColor: 'white', borderWidth: 1, backgroundColor: color },
+    amount: { fontWeight: 'bold', color: colors.foregroundColor },
+    tranContainer: { paddingLeft: 20 },
+    tranText: { fontWeight: 'normal', fontSize: 13, color: colors.alternativeTextColor },
+    memo: { fontSize: 13, marginTop: 3, color: colors.alternativeTextColor },
     changeLight: { backgroundColor: colors.buttonDisabledBackgroundColor },
     changeDark: { backgroundColor: colors.buttonDisabledBackgroundColor, borderWidth: 0 },
     changeText: { color: colors.alternativeTextColor },
@@ -72,23 +74,30 @@ const Output = ({
       onPress={onPress}
       containerStyle={[{ borderBottomColor: colors.lightBorder, backgroundColor: colors.elevated }, full && oStyles.containerFull]}
     >
-      <Avatar rounded overlayContainerStyle={[oStyles.avatar, { backgroundColor: color }]} />
+      <Avatar rounded overlayContainerStyle={[oStyles.avatar]} />
       <ListItem.Content>
-        <ListItem.Title style={[oStyles.amount, { color: colors.foregroundColor }]}>{amount}</ListItem.Title>
+        <ListItem.Title style={[oStyles.amount]}>
+          {amount}
+          {full && (
+            <View style={oStyles.tranContainer}>
+              <Text style={oStyles.tranText}>{loc.formatString(loc.transactions.list_conf, { number: confirmations })}</Text>
+            </View>
+          )}
+        </ListItem.Title>
         {full ? (
           <>
             {memo ? (
               <>
-                <ListItem.Subtitle style={[oStyles.memo, { color: colors.alternativeTextColor }]}>{memo}</ListItem.Subtitle>
+                <ListItem.Subtitle style={[oStyles.memo]}>{memo}</ListItem.Subtitle>
                 <BlueSpacing10 />
               </>
             ) : null}
-            <ListItem.Subtitle style={[oStyles.memo, { color: colors.alternativeTextColor }]}>{address}</ListItem.Subtitle>
+            <ListItem.Subtitle style={[oStyles.memo]}>{address}</ListItem.Subtitle>
             <BlueSpacing10 />
-            <ListItem.Subtitle style={[oStyles.memo, { color: colors.alternativeTextColor }]}>{fullId}</ListItem.Subtitle>
+            <ListItem.Subtitle style={[oStyles.memo]}>{fullId}</ListItem.Subtitle>
           </>
         ) : (
-          <ListItem.Subtitle style={[oStyles.memo, { color: colors.alternativeTextColor }]} numberOfLines={1}>
+          <ListItem.Subtitle style={[oStyles.memo]} numberOfLines={1}>
             {memo || shortId}
           </ListItem.Subtitle>
         )}
@@ -109,6 +118,7 @@ Output.propTypes = {
     txid: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired,
     vout: PropTypes.number.isRequired,
+    confirmations: PropTypes.number.isRequired,
   }),
   balanceUnit: PropTypes.string,
   oMemo: PropTypes.string,
